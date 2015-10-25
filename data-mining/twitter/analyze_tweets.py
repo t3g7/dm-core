@@ -38,9 +38,7 @@ def tokenize(s):
 def preprocess(s, lowercase=False):
 	tokens = tokenize(s)
 	if lowercase:
-		tokens = [token if emoticon_re.search(token)
-						else token.lower()
-				  for token in tokens]
+		tokens = [token if emoticon_re.search(token) else token.lower() for token in tokens]
 	return tokens
 
 dataset_file = "tweets.json"

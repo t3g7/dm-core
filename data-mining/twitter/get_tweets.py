@@ -19,8 +19,7 @@ def oauth_login():
 	OAUTH_TOKEN = tokens['OAUTH_TOKEN']
 	OAUTH_TOKEN_SECRET = tokens['OAUTH_TOKEN_SECRET']
 
-	auth = twitter.oauth.OAuth(
-		OAUTH_TOKEN, OAUTH_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
+	auth = twitter.oauth.OAuth(OAUTH_TOKEN, OAUTH_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
 	twitter_api = twitter.Twitter(auth=auth)
 
 	return twitter_api
@@ -45,10 +44,8 @@ def print_recent_tweets(statuses, **kw):
 	"""
 
 	status_texts = [status['text'] for status in statuses]
-	screen_names = [user_mention['screen_name']
-					for status in statuses for user_mention in status['entities']['user_mentions']]
-	hashtags = [hashtag['text']
-				for status in statuses for hashtag in status['entities']['hashtags']]
+	screen_names = [user_mention['screen_name'] for status in statuses for user_mention in status['entities']['user_mentions']]
+	hashtags = [hashtag['text'] for status in statuses for hashtag in status['entities']['hashtags']]
 	words = [w for t in status_texts for w in t.split()]
 
 	# Pretty Print words, names and hashtags
