@@ -65,15 +65,17 @@ def print_stream(twitter_api, q, **kw):
 	twitter_stream = twitter.TwitterStream(auth=twitter_api.auth)
 	stream = twitter_stream.statuses.filter(track=q)
 
+	#with open('tweets_dataset.json', 'wb') as f:
+	#	for tweet in stream:
+	#		json.dump(tweet,f)
 	for tweet in stream:
-		print tweet
-
+		print json.dumps(tweet)
 
 twitter_api = oauth_login()
 
-# Search for specific keywords
+# Search for specific keywordsr
 # See https://dev.twitter.com/rest/public/search
-q = "@Orange_France"
+q = '@Orange_France'
 statuses = twitter_search(twitter_api, q)
 
 # print_recent_tweets(statuses)
