@@ -1,9 +1,8 @@
-import twitter
-import json
-import pprint
-from collections import Counter
-from prettytable import PrettyTable
+#!/usr/bin/env python
 
+import tweepy
+import json
+import os
 
 def oauth_login():
 	"""
@@ -19,64 +18,45 @@ def oauth_login():
 	OAUTH_TOKEN = tokens['OAUTH_TOKEN']
 	OAUTH_TOKEN_SECRET = tokens['OAUTH_TOKEN_SECRET']
 
-	auth = twitter.oauth.OAuth(OAUTH_TOKEN, OAUTH_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
-	twitter_api = twitter.Twitter(auth=auth)
+	auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+	auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
 
-	return twitter_api
-
-
-def twitter_search(twitter_api, q, **kw):
-	"""
-		Search tweets with specified criteria.
-		Returns statuses.
-	"""
-
-	search_results = twitter_api.search.tweets(q=q, count=1, **kw)
-	statuses = search_results['statuses']
-
-	return statuses
+	return auth
 
 
-def print_recent_tweets(statuses, **kw):
-	"""
-		Print tweets with names and hashtags corresponding to
-		keywords searched
-	"""
+class StreamListener(tweepy.StreamListener):
 
-	status_texts = [status['text'] for status in statuses]
-	screen_names = [user_mention['screen_name'] for status in statuses for user_mention in status['entities']['user_mentions']]
-	hashtags = [hashtag['text'] for status in statuses for hashtag in status['entities']['hashtags']]
-	words = [w for t in status_texts for w in t.split()]
+	def on_data(self, data):
+		"""
+			Export data to a text file
+		"""
 
-	# Pretty Print words, names and hashtags
-	for label, data in (('Word', words), ('Screen Name', screen_names), ('Hashtag', hashtags)):
-		pt = PrettyTable(field_names=[label, 'Count'])
-		c = Counter(data)
-		[pt.add_row(kv) for kv in c.most_common()[:50]]
-		pt.align[label], pt.align['Count'] = 'l', 'r'
-		print pt
+		dataset_dir = 'tweets_dataset'
+		if not os.path.exists(dataset_dir):
+			os.mkdir(dataset_dir)
+
+		try:
+			json_data = json.loads(data)
+			print json_data['text']
+			with open(dataset_dir + os.sep + 'tweets.txt', 'a') as f:
+				f.write(data)
+			return True
+		except Exception, e:
+			print 'Failed on data,', str(e)
+			pass
+
+	def on_error(self, status):
+		print status
 
 
-def print_stream(twitter_api, q, **kw):
-	"""
-		Get a stream of tweets. See https://dev.twitter.com/streaming/overview
-	"""
+if __name__ == '__main__':
 
-	twitter_stream = twitter.TwitterStream(auth=twitter_api.auth)
-	stream = twitter_stream.statuses.filter(track=q)
+	auth = oauth_login()
+	sl = StreamListener()
+	stream = tweepy.Stream(auth=auth, listener=sl)
 
-	#with open('tweets_dataset.json', 'wb') as f:
-	#	for tweet in stream:
-	#		json.dump(tweet,f)
-	for tweet in stream:
-		print json.dumps(tweet)
-
-twitter_api = oauth_login()
-
-# Search for specific keywordsr
-# See https://dev.twitter.com/rest/public/search
-q = '@Orange_France'
-statuses = twitter_search(twitter_api, q)
-
-# print_recent_tweets(statuses)
-print_stream(twitter_api, q)
+	# Search for specific keywords
+	# See https://dev.twitter.com/rest/public/search
+	languages = ['fr']
+	keywords = ['orange', 'orange_france', 'sosh', 'sosh_fr', 'orange_conseil']
+	stream.filter(languages=languages, track=keywords)

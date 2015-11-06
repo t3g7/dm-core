@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding: utf8
+# -*- coding: utf-8 -*-
 
 import json
 import re
@@ -30,10 +30,10 @@ regex_str = [
 	r'(?:\S)' # anything else
 ]
 
-tokens_re = re.compile(r'('+'|'.join(regex_str)+')', re.VERBOSE | re.IGNORECASE)
+tokens_re = re.compile(r'('+'|'.join(regex_str)+')', re.VERBOSE | re.IGNORECASE | re.UNICODE)
 emoticon_re = re.compile(r'^'+emoticons_str+'$', re.VERBOSE | re.IGNORECASE)
 punctuation = list(string.punctuation)
-stop = stopwords.words('french') + punctuation + ['rt', 'via']
+stop = stopwords.words('english') + punctuation + ['rt', 'via']
 
 def tokenize(s):
 	return tokens_re.findall(s)
@@ -44,7 +44,7 @@ def preprocess(s, lowercase=False):
 		tokens = [token if emoticon_re.search(token) else token.lower() for token in tokens]
 	return tokens
 
-dataset_file = 'tweets_dataset.txt'
+dataset_file = 'tweets_dataset/tweets.json'
 with open(dataset_file, "r") as f:
 	count_all = Counter()
 	count_stop = Counter()
@@ -58,7 +58,7 @@ with open(dataset_file, "r") as f:
 			# Create a list of terms
 			terms_all = [term for term in preprocess(tweet['text'])]
 			# Create a list of terms without stopwords
-			terms_stop = [term.encode('utf8') for term in preprocess(tweet['text']) if term not in stop]
+			terms_stop = [term for term in preprocess(tweet['text']) if term not in stop]
 			# Count terms only once
 			terms_single = set(terms_all)
 			# Count hashtags only
@@ -72,7 +72,7 @@ with open(dataset_file, "r") as f:
 			count_hashtags.update(terms_hash)
 
 #print count_all.most_common(5)
-print count_stop.most_common(10)
+print count_stop.most_common(20)
 #print count_hashtags.most_common(5)
 
 terms_bigram = list(bigrams(terms_stop))
