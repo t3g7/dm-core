@@ -4,13 +4,6 @@ from time import mktime
 from datetime import datetime
 from datetime import timedelta
 
-# Recup des tweets en json
-tab = []
-with open('datasets/tweets_dataset_20151027.txt',"r") as data_file:   
-	for line in data_file: 
-		data = json.loads(line)
-		tab = tab + [data['created_at']]
-
 # Conversion en datetime
 dates = []
 with open('datasets/tweets_dataset_20151027.txt',"r") as data_file:   
